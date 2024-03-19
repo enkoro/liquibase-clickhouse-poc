@@ -4,7 +4,7 @@
 
 - Running ClickHouse
 - Migrations places in sql folder
-- Correct credentials to connect to CH are set in %liquibase.properties%
+- Correct credentials to connect to CH are set in _liquibase.properties_
 
 ## Build
 
