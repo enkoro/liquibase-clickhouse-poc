@@ -1,3 +1,3 @@
 --liquibase formatted sql
---changeset johndoe:create-dummy-database
-CREATE DATABASE IF NOT EXISTS dummy;
+--changeset test:create-dummy-database
+create database if not exists dummy;
