@@ -32,6 +32,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - DB_URL=${DB_URL}
+        - DB_USERNAME=${DB_USERNAME}
+        - DB_PASSWORD=${DB_PASSWORD}
     command:
       [
         "liquibase",
@@ -40,6 +44,7 @@ services:
         "--headless=true",
         "update",
       ]
+    # command: tail -F /dev/null
     depends_on:
       clickhouse:
         condition: service_healthy

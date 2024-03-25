@@ -1,13 +1,29 @@
-FROM maven:3.8.7-openjdk-18-slim as build
-WORKDIR /app
-RUN curl -L https://github.com/MEDIARITHMICS/liquibase-clickhouse/archive/refs/tags/0.7.2.tar.gz > 0.7.2.tar.gz
-RUN tar zxvf 0.7.2.tar.gz
-WORKDIR /app/liquibase-clickhouse-0.7.2
-RUN mvn clean package -DskipTests
+ARG MVN_VERSION=3.8.7
+ARG LIQUIBASE_CLICKHOUSE_VERSION=0.7.2
+ARG LIQUIBASE_VERSION=4.6.1
 
-FROM liquibase/liquibase:4.6.1
+FROM maven:${MVN_VERSION}-openjdk-18-slim as build
+
+ARG LIQUIBASE_CLICKHOUSE_VERSION
+ARG DB_URL
+ARG DB_USERNAME
+ARG DB_PASSWORD
+
+WORKDIR /build
+RUN curl -L https://github.com/MEDIARITHMICS/liquibase-clickhouse/archive/refs/tags/${LIQUIBASE_CLICKHOUSE_VERSION}.tar.gz > ${LIQUIBASE_CLICKHOUSE_VERSION}.tar.gz && \
+    tar zxvf ${LIQUIBASE_CLICKHOUSE_VERSION}.tar.gz
+WORKDIR /build/liquibase-clickhouse-${LIQUIBASE_CLICKHOUSE_VERSION}
+RUN mvn clean package -DskipTests
+COPY liquibase.properties.tpl .
+COPY eval_file.sh . 
+RUN ./eval_file.sh liquibase.properties.tpl ../liquibase.properties
+
+FROM liquibase/liquibase:${LIQUIBASE_VERSION}
+
+ARG LIQUIBASE_CLICKHOUSE_VERSION
+
 WORKDIR /liquibase
-COPY --from=build /app/liquibase-clickhouse-0.7.2/target/liquibase-clickhouse-0.7.2-shaded.jar ./lib/clickhouse.jar
+COPY --from=build /build/liquibase-clickhouse-${LIQUIBASE_CLICKHOUSE_VERSION}/target/liquibase-clickhouse-${LIQUIBASE_CLICKHOUSE_VERSION}-shaded.jar ./lib/clickhouse.jar
 COPY root-changelog.xml ./changelog/
 COPY sql/ ./changelog/sql/
-COPY liquibase.properties ./
+COPY --from=build /build/liquibase.properties .

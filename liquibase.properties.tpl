@@ -1,6 +1,6 @@
-url: jdbc:clickhouse://clickhouse:8123
-username: default
-password:
+url: $DB_URL
+username: $DB_USERNAME
+password: $DB_PASSWORD
 classpath: /liquibase/changelog
 changeLogFile: root-changelog.xml
 driver: shaded.liquibase.ru.yandex.clickhouse.ClickHouseDriver
